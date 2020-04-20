@@ -1,7 +1,7 @@
 use std::io;
 use std::io::prelude::*;
 
-fn compute_fuel(mass: f64) -> f64 {
+fn compute_required_fuel(mass: f64) -> f64 {
     (mass / 3f64).floor() - 2f64
 }
 
@@ -13,7 +13,12 @@ fn main() {
         let mass = line
             .parse::<f64>()
             .expect(&(format!("Can't parse line: \"{}\"", line)[..]));
-        required_fuel += compute_fuel(mass);
+
+        let mut fuel = compute_required_fuel(mass);
+        while fuel > 0f64 {
+            required_fuel += fuel;
+            fuel = compute_required_fuel(fuel);
+        }
     }
     println!("Required_fuel: {}", required_fuel);
 }
