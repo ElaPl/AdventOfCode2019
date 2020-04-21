@@ -7,7 +7,9 @@ fn read_number_from(buf: &Vec<u8>) -> Result<usize, Box<dyn error::Error>> {
     return Ok(str::parse::<usize>(&(as_str[..as_str.len() - 1]))?);
 }
 
-fn run_intcode_program(buf: &mut Vec<usize>) -> Option<&Vec<usize>> {
+fn run_intcode_program(mut buf: Vec<usize>, param1: usize, param2: usize) -> Option<usize> {
+    buf[1] = param1;
+    buf[2] = param2;
     let mut iterator = 0;
     while iterator + 3 < buf.len() {
         let (l, r, out_position) = (buf[iterator + 1], buf[iterator + 2], buf[iterator + 3]);
@@ -22,9 +24,7 @@ fn run_intcode_program(buf: &mut Vec<usize>) -> Option<&Vec<usize>> {
         }
 
         match buf[iterator] {
-            1 => {
-                buf[out_position] = buf[l] + buf[r];
-            }
+            1 => buf[out_position] = buf[l] + buf[r],
             2 => buf[out_position] = buf[l] * buf[r],
             99 => break,
             _ => {
@@ -39,7 +39,7 @@ fn run_intcode_program(buf: &mut Vec<usize>) -> Option<&Vec<usize>> {
         iterator += 4;
     }
 
-    Option::Some(buf)
+    Option::Some(buf[0])
 }
 
 fn main() {
@@ -51,9 +51,14 @@ fn main() {
         buf.clear();
     }
 
-    input[1] = 12;
-    input[2] = 2;
-    if let Some(result) = run_intcode_program(&mut input) {
-        println!("{:?}", result);
+    for noun in 0..100 {
+        for verb in 0..100 {
+            if let Some(result) = run_intcode_program(input.to_vec(), noun, verb) {
+                if result == 19690720 {
+                    println!("Result: {}", 100 * noun + verb);
+                    return;
+                }
+            }
+        }
     }
 }
